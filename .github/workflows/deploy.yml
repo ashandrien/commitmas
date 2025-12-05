@@ -1,0 +1,78 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            commitmas-frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./commitmas-frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: ./commitmas-frontend
+        run: npm run build
+        env:
+          VITE_API_URL: https://commitmas.phillygpt.com
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd /home/user/apps/commitmas
+            
+            # Pull latest backend code
+            rm -rf backend/src
+            mkdir -p backend/src
+            
+      - name: Copy backend files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          source: "backend/src/*,backend/package.json,backend/package-lock.json"
+          target: "/home/user/apps/commitmas/"
+          strip_components: 0
+
+      - name: Copy frontend build to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          source: "commitmas-frontend/dist/*"
+          target: "/home/user/apps/commitmas/frontend/"
+          strip_components: 2
+
+      - name: Restart backend and install dependencies
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd /home/user/apps/commitmas/backend
+            npm install --production
+            pm2 restart commitmas-backend || pm2 start src/index.js --name commitmas-backend
+            pm2 save
