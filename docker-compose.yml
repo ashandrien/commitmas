@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+      - REDIS_URL=redis://redis:6379
+      - FRONTEND_URL=http://localhost:5173
+      - CALLBACK_URL=http://localhost:8000/auth/callback
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - redis
+    volumes:
+      - ./backend/src:/app/src
+    networks:
+      - commitmas-network
+
+  frontend:
+    build:
+      context: ./commitmas-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./commitmas-frontend/src:/app/src
+    networks:
+      - commitmas-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - commitmas-network
+
+networks:
+  commitmas-network:
+    driver: bridge
+
+volumes:
+  redis-data:
