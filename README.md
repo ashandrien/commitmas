@@ -1,6 +1,6 @@
 # Commitmas
 
-Your Year in Code, Wrapped - A GitHub Wrapped-style application that reviews your GitHub contributions for the year.
+Your Year in Code, as a COMMITMAS PRESENT - A GitHub Wrapped-style application that reviews your GitHub contributions for the year.
 
 ## Features
 
