@@ -29,7 +29,7 @@ export default function FinalSlide({ data }: Props) {
 
   return (
     <div className="text-center">
-      <h2 className="text-5xl font-bold text-white mb-4">That's a Wrap!</h2>
+      <h2 className="text-5xl font-bold text-white mb-4">Merry Commitmas!</h2>
       <p className="text-green-200 mb-8 text-xl">
         Here's to an even better {data.year + 1}
       </p>
