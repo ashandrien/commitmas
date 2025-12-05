@@ -10,6 +10,10 @@ const { fetchGitHubWrapped } = require('./github');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Redis client
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
@@ -29,6 +33,7 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -68,6 +73,7 @@ app.get('/auth/github', passport.authenticate('github', { scope: ['read:user', '
 app.get('/auth/callback',
   passport.authenticate('github', { failureRedirect: '/auth/failure' }),
   (req, res) => {
+    console.log('AUTH CALLBACK SUCCESS - User:', req.user?.username);
     res.redirect(process.env.FRONTEND_URL || 'http://localhost:5173');
   }
 );
