@@ -16,7 +16,7 @@ export default function WelcomeSlide({ data }: Props) {
         {data.user.name || data.user.username}'s
       </h1>
       <h2 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-emerald-400 mb-6">
-        {data.year} Wrapped
+        Merry Commitmas {data.year} 
       </h2>
       <p className="text-xl text-green-200 opacity-80">
         Let's look back at your year in code
