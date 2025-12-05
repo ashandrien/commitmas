@@ -89,7 +89,43 @@ VITE_API_URL=http://localhost:8000
 - `GET /api/wrapped` - Get wrapped data (cached)
 - `GET /health` - Health check
 
+## Deployment
+
+### Production URL
+
+https://commitmas.phillygpt.com
+
+### Auto-Deploy with GitHub Actions
+
+The repository includes a GitHub Actions workflow that automatically deploys to the VPS when code is pushed to `main`.
+
+**Required GitHub Secrets:**
+- `VPS_HOST` - VPS IP address
+- `VPS_USERNAME` - SSH username
+- `VPS_PASSWORD` - SSH password
+
+**What the workflow does:**
+1. Builds the frontend with production settings
+2. Copies backend and frontend files to VPS via SCP
+3. Installs dependencies on VPS
+4. Restarts the backend with PM2
+
+### Manual Deployment
+
+```bash
+# On VPS
+cd /home/user/apps/commitmas/backend
+npm install --production
+pm2 restart commitmas-backend
+```
+
+### VPS Architecture
+
+- **Backend**: Node.js/Express on port 3001, managed by PM2
+- **Frontend**: Static files served by Nginx
+- **Cache**: KeyDB (Redis-compatible) on port 6379
+- **Reverse Proxy**: Nginx with SSL (Let's Encrypt)
+
 ## License
 
 MIT
-ASHANDRIEN
